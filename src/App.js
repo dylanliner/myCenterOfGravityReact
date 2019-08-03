@@ -40,9 +40,9 @@ class App extends React.PureComponent {
 
   render() {
     return (
-      <div style={{width: '100vw', height: '100vh'}}>
+      <div style={{width: '100vw', height: '50vh'}}>
     <MapWithAMarker
-    googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=AIzaSyAQoKSR3RE72R8Ix01Y_GVSPD1hqq5kEzw"
+    googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key="
     loadingElement={<div style={{ height: `100%` }} />}
     containerElement={<div style={{ height: `100%` }} />}
     mapElement={<div style={{ height: `100%` }} />}
