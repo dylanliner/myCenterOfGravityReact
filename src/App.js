@@ -5,6 +5,7 @@ import {
   GoogleMap,
   Marker,
 } from "react-google-maps";
+import Example from "./components/UploadModal.js"
 
 const MapWithAMarker = withScriptjs(withGoogleMap(props =>
   <GoogleMap
@@ -16,6 +17,11 @@ const MapWithAMarker = withScriptjs(withGoogleMap(props =>
     />
   </GoogleMap>
 ));
+
+const APIKey =process.env.REACT_APP_MAPS_JS_API_KEY;
+
+
+
 
 
 class App extends React.PureComponent {
@@ -40,13 +46,17 @@ class App extends React.PureComponent {
 
   render() {
     return (
-      <div style={{width: '100vw', height: '50vh'}}>
+      <div>
+      <div style={{width: '100vw', height: '100vh'}}>
     <MapWithAMarker
-    googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key="
+    googleMapURL={"https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key="+APIKey}
     loadingElement={<div style={{ height: `100%` }} />}
     containerElement={<div style={{ height: `100%` }} />}
     mapElement={<div style={{ height: `100%` }} />}
     />
+    </div>
+    <Example />
+    
     </div>
     )
   }
