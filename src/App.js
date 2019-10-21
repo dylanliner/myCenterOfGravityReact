@@ -5,29 +5,40 @@ import {
   GoogleMap,
   Marker,
 } from "react-google-maps";
+
+import { Map, GoogleApiWrapper } from 'google-maps-react';
+
 import Example from "./components/UploadModal.js"
 
-const MapWithAMarker = withScriptjs(withGoogleMap(props =>
-  <GoogleMap
-    defaultZoom={8}
-    defaultCenter={{ lat: -34.397, lng: 150.644 }}
-  >
-    <Marker
-      position={{ lat: -34.397, lng: 150.644 }}
-    />
-  </GoogleMap>
-));
 
-const APIKey =process.env.REACT_APP_MAPS_JS_API_KEY;
 
+const APIKey = process.env.REACT_APP_MAPS_JS_API_KEY;
+const mapStyles = {
+  width: '100%',
+  height: '100%',
+};
 
 
 
 
 class App extends React.PureComponent {
-  state = {
-    isMarkerShown: false,
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      longitude: 150.644,
+      latitude: -34.397
+    };
   }
+
+
+  handlePositions = (updateLatitude, updateLongitude) => {
+    console.log('in parent', updateLatitude, updateLongitude)
+    this.setState({ latitude: updateLatitude });
+    this.setState({ longitude: updateLongitude });
+  }
+
+
 
   componentDidMount() {
     this.delayedShowMarker()
@@ -47,19 +58,24 @@ class App extends React.PureComponent {
   render() {
     return (
       <div>
-      <div style={{width: '100vw', height: '100vh'}}>
-    <MapWithAMarker
-    googleMapURL={"https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key="+APIKey}
-    loadingElement={<div style={{ height: `100%` }} />}
-    containerElement={<div style={{ height: `100%` }} />}
-    mapElement={<div style={{ height: `100%` }} />}
-    />
-    </div>
-    <Example />
-    
-    </div>
+        <div style={{ width: '100vw', height: '100vh' }}>
+          <Map
+            google={this.props.google}
+            zoom={8}
+            style={mapStyles}
+            initialCenter={{ lat: this.state.latitude, lng: this.state.longitude }}
+            centerAroundCurrentLocation={true}
+          />
+
+
+        </div>
+        <Example onComplete={this.handlePositions} />
+
+      </div>
     )
   }
 }
 
-export default App;
+export default GoogleApiWrapper({
+  apiKey: APIKey
+})(App);
