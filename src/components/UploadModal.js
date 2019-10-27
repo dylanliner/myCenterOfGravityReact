@@ -24,7 +24,7 @@ function Example({ onComplete }) {
 
 
         os.node('locations.*', function (location) {
-            let predicate = location.latitudeE7 >
+            let predicate = true
             if (predicate) {
                 latitudeSum = latitudeSum + location.latitudeE7;
 
