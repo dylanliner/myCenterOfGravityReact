@@ -1,41 +1,46 @@
 import React from "react";
-import {
-  withScriptjs,
-  withGoogleMap,
-  GoogleMap,
-  Marker,
-} from "react-google-maps";
 
-import { Map, GoogleApiWrapper } from 'google-maps-react';
+
+import { GoogleApiWrapper } from 'google-maps-react';
 
 import Example from "./components/UploadModal.js"
-
+import Map from "./components/Map.jsx"
+import Marker from "./components/Marker.jsx"
 
 
 const APIKey = process.env.REACT_APP_MAPS_JS_API_KEY;
-const mapStyles = {
-  width: '100%',
-  height: '100%',
-};
+
+const style = {
+  width: '100vw',
+  height: '100vh'
+}
 
 
 
-
-class App extends React.PureComponent {
+class App extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      longitude: 150.644,
-      latitude: -34.397
+      location: {
+        lat: null,
+        lng: null,
+      }
+
     };
+
   }
 
 
   handlePositions = (updateLatitude, updateLongitude) => {
     console.log('in parent', updateLatitude, updateLongitude)
-    this.setState({ latitude: updateLatitude });
-    this.setState({ longitude: updateLongitude });
+    this.setState({
+      location: {
+        lat: updateLatitude,
+        lng: updateLongitude
+      }
+    })
+    console.log('in parent', this.state.location)
   }
 
 
@@ -55,22 +60,27 @@ class App extends React.PureComponent {
     this.delayedShowMarker()
   }
 
+
+
+
+
   render() {
     return (
       <div>
-        <div style={{ width: '100vw', height: '100vh' }}>
-          <Map
-            google={this.props.google}
-            zoom={8}
-            style={mapStyles}
-            initialCenter={{ lat: this.state.latitude, lng: this.state.longitude }}
-            centerAroundCurrentLocation={true}
-          />
 
+        <div style={style}>
+          <Map google={this.props.google} currentLocation={this.state.location} >
+            <Marker position={this.state.location} />
+            <Marker />
+          </Map>
 
         </div>
-        <Example onComplete={this.handlePositions} />
 
+
+        <div>
+          <Example onComplete={this.handlePositions} />
+
+        </div>
       </div>
     )
   }
