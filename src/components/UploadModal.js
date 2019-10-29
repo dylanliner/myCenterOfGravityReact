@@ -10,7 +10,18 @@ function Example({ onComplete }) {
     const [show, setShow] = React.useState(true);
     const handleClose = () => setShow(false);
 
-    const maxSize = 104857600;
+    const maxSize = 204857600;
+    const centerPoint = {
+        lat: 48.85341,
+        lng: 2.3488
+    }
+
+    const centerPointToExclude = {
+        lat: 48.81670,
+        lng: 2.2333
+    }
+    const distanceToCenter = 12;
+    const distanceToCenterToExclude = 3;
 
     const onDrop = React.useCallback(acceptedFiles => {
         console.log(acceptedFiles);
@@ -21,11 +32,16 @@ function Example({ onComplete }) {
         let longitudeSum = 0;
         let positionCount = 0;
         var os = new oboe();
-
-
         os.node('locations.*', function (location) {
-            let predicate = true
-            if (predicate) {
+
+            let isLocationWithinDistance = true;
+            let isNotWithinDistance = true;
+            if (true) {
+                isLocationWithinDistance = checkIfWithinDistance(location)
+                isNotWithinDistance = checkNotWithinDistance(location)
+            }
+
+            if (isLocationWithinDistance && isNotWithinDistance) {
                 latitudeSum = latitudeSum + location.latitudeE7;
 
                 longitudeSum = longitudeSum + location.longitudeE7
@@ -42,6 +58,26 @@ function Example({ onComplete }) {
         });
         parseFile(acceptedFile, os);
     }, []);
+
+    function checkNotWithinDistance(location) {
+
+        var ky = 40000 / 360;
+        var kx = Math.cos(Math.PI * centerPointToExclude.lat / 180.0) * ky;
+        var dx = Math.abs(centerPointToExclude.lng - location.longitudeE7 / 10000000) * kx;
+        var dy = Math.abs(centerPointToExclude.lat - location.latitudeE7 / 10000000) * ky;
+        return Math.sqrt(dx * dx + dy * dy) >= distanceToCenterToExclude;
+    }
+
+    function checkIfWithinDistance(location) {
+
+        var ky = 40000 / 360;
+        var kx = Math.cos(Math.PI * centerPoint.lat / 180.0) * ky;
+        var dx = Math.abs(centerPoint.lng - location.longitudeE7 / 10000000) * kx;
+        var dy = Math.abs(centerPoint.lat - location.latitudeE7 / 10000000) * ky;
+        return Math.sqrt(dx * dx + dy * dy) <= distanceToCenter;
+    }
+
+
 
     function parseFile(file, oboe) {
         var fileSize = file.size;
@@ -92,7 +128,7 @@ function Example({ onComplete }) {
 
             <Modal show={show} onHide={handleClose} >
                 <Modal.Header closeButton >
-                    <Modal.Title>Modal heading </Modal.Title>
+                    <Modal.Title>What's my center of Gravity?</Modal.Title>
 
                 </Modal.Header>
 
