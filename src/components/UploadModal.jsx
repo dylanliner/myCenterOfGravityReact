@@ -1,14 +1,15 @@
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 import React from "react";
 import { useDropzone } from 'react-dropzone';
 import oboe from 'oboe';
 
 
 
-function Example({ onComplete }) {
-    const [show, setShow] = React.useState(true);
-    const handleClose = () => setShow(false);
+function Example({ onComplete, handleClose }) {
+
+    const [percentLoaded, setPercentLoaded] = React.useState(0);
+
 
     const maxSize = 204857600;
     const centerPoint = {
@@ -20,31 +21,35 @@ function Example({ onComplete }) {
         lat: 48.81670,
         lng: 2.2333
     }
-    const distanceToCenter = 12;
+
+    const distanceToCenter = 15;
     const distanceToCenterToExclude = 3;
 
     const onDrop = React.useCallback(acceptedFiles => {
-        console.log(acceptedFiles);
+        const startTime = new Date().getTime();
         const acceptedFile = acceptedFiles[0];
         let centerOfGravityLatitude = 0
         let centerOfGravityLongitude = 0
         let latitudeSum = 0;
         let longitudeSum = 0;
         let positionCount = 0;
+        let isLocationWithinDistance = true;
+        let isNotWithinDistance = true;
         var os = new oboe();
         os.node('locations.*', function (location) {
 
-            let isLocationWithinDistance = true;
-            let isNotWithinDistance = true;
-            if (true) {
-                isLocationWithinDistance = checkIfWithinDistance(location)
-                isNotWithinDistance = checkNotWithinDistance(location)
+            if (centerPoint) {
+                isLocationWithinDistance = checkIfWithinDistance(location, centerPoint, distanceToCenter)
+            }
+
+            if (centerPointToExclude) {
+                isNotWithinDistance = !checkIfWithinDistance(location, centerPointToExclude, distanceToCenterToExclude)
             }
 
             if (isLocationWithinDistance && isNotWithinDistance) {
-                latitudeSum = latitudeSum + location.latitudeE7;
+                latitudeSum += location.latitudeE7;
 
-                longitudeSum = longitudeSum + location.longitudeE7
+                longitudeSum += location.longitudeE7
                 ++positionCount;
             }
         }).done(function () {
@@ -54,30 +59,24 @@ function Example({ onComplete }) {
             console.log('Average Latitude ' + centerOfGravityLatitude)
             console.log('Average Longitude ' + centerOfGravityLongitude)
             onComplete(centerOfGravityLatitude, centerOfGravityLongitude)
+            const endTime = new Date().getTime();
+            console.log((endTime - startTime) / 1000 + " seconds");
             handleClose();
         });
         parseFile(acceptedFile, os);
-    }, []);
 
-    function checkNotWithinDistance(location) {
+    }, []
+    );
 
-        var ky = 40000 / 360;
-        var kx = Math.cos(Math.PI * centerPointToExclude.lat / 180.0) * ky;
-        var dx = Math.abs(centerPointToExclude.lng - location.longitudeE7 / 10000000) * kx;
-        var dy = Math.abs(centerPointToExclude.lat - location.latitudeE7 / 10000000) * ky;
-        return Math.sqrt(dx * dx + dy * dy) >= distanceToCenterToExclude;
-    }
 
-    function checkIfWithinDistance(location) {
+    function checkIfWithinDistance(testLocation, centerPoint, distanceToCenter) {
 
         var ky = 40000 / 360;
         var kx = Math.cos(Math.PI * centerPoint.lat / 180.0) * ky;
-        var dx = Math.abs(centerPoint.lng - location.longitudeE7 / 10000000) * kx;
-        var dy = Math.abs(centerPoint.lat - location.latitudeE7 / 10000000) * ky;
+        var dx = Math.abs(centerPoint.lng - testLocation.longitudeE7 / 10000000) * kx;
+        var dy = Math.abs(centerPoint.lat - testLocation.latitudeE7 / 10000000) * ky;
         return Math.sqrt(dx * dx + dy * dy) <= distanceToCenter;
     }
-
-
 
     function parseFile(file, oboe) {
         var fileSize = file.size;
@@ -85,9 +84,12 @@ function Example({ onComplete }) {
         var offset = 0;
         var chunkReaderBlock = null;
 
+
+
         var readEventHandler = function (evt) {
             if (evt.target.error == null) {
                 offset += evt.target.result.length;
+                setPercentLoaded((100 * offset / fileSize).toFixed(0));
                 oboe.emit('data', evt.target.result); // callback for handling read chunk
             } else {
                 console.log("Read error: " + evt.target.error);
@@ -126,7 +128,7 @@ function Example({ onComplete }) {
     return (
         <>
 
-            <Modal show={show} onHide={handleClose} >
+            <Modal show={true} onHide={handleClose} >
                 <Modal.Header closeButton >
                     <Modal.Title>What's my center of Gravity?</Modal.Title>
 
@@ -157,14 +159,12 @@ function Example({ onComplete }) {
                         }
                     </ul>
                 </div>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose} >
-                        Close
-            </Button>
-                    < Button variant="primary" onClick={handleClose} >
-                        Save Changes
-                    </Button>
-                </Modal.Footer>
+                <div>
+                    {percentLoaded > 0 &&
+                        <ProgressBar animated now={percentLoaded} label={`${percentLoaded}%`} />
+                    }
+                </div>
+
             </Modal>
         </>
     );
