@@ -3,36 +3,47 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 import React from "react";
 import { useDropzone } from 'react-dropzone';
 import oboe from 'oboe';
-import Form from 'react-bootstrap/Form'
-import Button from 'react-bootstrap/Button'
-
-import { Formik } from 'formik';
-import * as yup from 'yup'; // for everything
 import InputGroup from 'react-bootstrap/InputGroup'
+import FormControl from 'react-bootstrap/FormControl'
+import Button from 'react-bootstrap/Button'
 import Col from 'react-bootstrap/Col'
-
-
+import Row from 'react-bootstrap/Row'
+import Accordion from 'react-bootstrap/Accordion'
+import Card from 'react-bootstrap/Card'
 
 function Example({ onComplete, handleClose }) {
 
     const [percentLoaded, setPercentLoaded] = React.useState(0);
+    const [city, setCity] = React.useState("");
+    const [excludedCity, setExcludedCity] = React.useState("");
+    const [excludedCityRadius, setExcludedCityRadius] = React.useState(3);
+    const [radius, setRadius] = React.useState(10);
 
 
     const maxSize = 204857600;
-    const centerPoint = {
-        lat: 48.85341,
-        lng: 2.3488
-    }
 
-    const centerPointToExclude = {
-        lat: 48.81670,
-        lng: 2.2333
-    }
 
-    const distanceToCenter = 15;
-    const distanceToCenterToExclude = 3;
+
 
     const onDrop = React.useCallback(acceptedFiles => {
+
+        console.log("the city is", city, "radius is", radius);
+        let centerPoint = null;
+        let centerPointToExclude = null;
+        if (city) {
+            centerPoint = {
+                lat: 48.85341,
+                lng: 2.3488
+            }
+        };
+
+        if (excludedCity) {
+            centerPointToExclude = {
+                lat: 48.81670,
+                lng: 2.2333
+            }
+        };
+
         const startTime = new Date().getTime();
         const acceptedFile = acceptedFiles[0];
         let centerOfGravityLatitude = 0
@@ -46,11 +57,11 @@ function Example({ onComplete, handleClose }) {
         os.node('locations.*', function (location) {
 
             if (centerPoint) {
-                isLocationWithinDistance = checkIfWithinDistance(location, centerPoint, distanceToCenter)
+                isLocationWithinDistance = checkIfWithinDistance(location, centerPoint, radius)
             }
 
             if (centerPointToExclude) {
-                isNotWithinDistance = !checkIfWithinDistance(location, centerPointToExclude, distanceToCenterToExclude)
+                isNotWithinDistance = !checkIfWithinDistance(location, centerPointToExclude, excludedCityRadius)
             }
 
             if (isLocationWithinDistance && isNotWithinDistance) {
@@ -72,7 +83,7 @@ function Example({ onComplete, handleClose }) {
         });
         parseFile(acceptedFile, os);
 
-    }, []
+    }, [city, radius, excludedCity, excludedCityRadius]
     );
 
 
@@ -135,17 +146,6 @@ function Example({ onComplete, handleClose }) {
 
 
 
-    const schema = yup.object({
-        firstName: yup.string().required(),
-        lastName: yup.string().required(),
-        username: yup.string().required(),
-        city: yup.string().required(),
-        state: yup.string().required(),
-        zip: yup.string().required(),
-        terms: yup.bool().required(),
-    });
-
-
     return (
 
         <>
@@ -156,131 +156,103 @@ function Example({ onComplete, handleClose }) {
 
                 </Modal.Header>
                 <Modal.Body>
-                    <Formik
-                        validationSchema={schema}
-                        onSubmit={console.log}
-                        initialValues={{
-                            firstName: 'Mark',
-                            lastName: 'Otto',
-                        }}
-                    >
-                        {({
-                            handleSubmit,
-                            handleChange,
-                            handleBlur,
-                            values,
-                            touched,
-                            isValid,
-                            errors,
-                        }) => (
-                                <Form noValidate onSubmit={handleSubmit}>
-                                    <Form.Row>
-                                        <Form.Group as={Col} md="4" controlId="validationFormik01">
-                                            <Form.Label>First name</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="firstName"
-                                                value={values.firstName}
-                                                onChange={handleChange}
-                                                isValid={touched.firstName && !errors.firstName}
-                                            />
-                                            <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Form.Group as={Col} md="4" controlId="validationFormik02">
-                                            <Form.Label>Last name</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                name="lastName"
-                                                value={values.lastName}
-                                                onChange={handleChange}
-                                                isValid={touched.lastName && !errors.lastName}
-                                            />
+                    <Accordion>
+                        <Card style={{ border: "none" }}>
+                            <Card.Header style={{ background: "none", borderBottom: "none" }}>
+                                <Accordion.Toggle className="text-center" as={Button} variant="link" eventKey="0">
+                                    Look for your average location in a specific area
+      </Accordion.Toggle>
+                            </Card.Header>
+                            <Accordion.Collapse eventKey="0">
+                                <Card.Body style={{ padding: "0", paddingTop: "15px" }}>
+                                    <div>
 
-                                            <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Form.Group as={Col} md="4" controlId="validationFormikUsername">
-                                            <Form.Label>Username</Form.Label>
-                                            <InputGroup>
-                                                <InputGroup.Prepend>
-                                                    <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
-                                                </InputGroup.Prepend>
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Username"
-                                                    aria-describedby="inputGroupPrepend"
-                                                    name="username"
-                                                    value={values.username}
-                                                    onChange={handleChange}
-                                                    isInvalid={!!errors.username}
-                                                />
-                                                <Form.Control.Feedback type="invalid">
-                                                    {errors.username}
-                                                </Form.Control.Feedback>
-                                            </InputGroup>
-                                        </Form.Group>
-                                    </Form.Row>
-                                    <Form.Row>
-                                        <Form.Group as={Col} md="6" controlId="validationFormik03">
-                                            <Form.Label>City</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="City"
-                                                name="city"
-                                                value={values.city}
-                                                onChange={handleChange}
-                                                isInvalid={!!errors.city}
-                                            />
 
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.city}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Form.Group as={Col} md="3" controlId="validationFormik04">
-                                            <Form.Label>State</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="State"
-                                                name="state"
-                                                value={values.state}
-                                                onChange={handleChange}
-                                                isInvalid={!!errors.state}
-                                            />
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.state}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Form.Group as={Col} md="3" controlId="validationFormik05">
-                                            <Form.Label>Zip</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Zip"
-                                                name="zip"
-                                                value={values.zip}
-                                                onChange={handleChange}
-                                                isInvalid={!!errors.zip}
-                                            />
+                                        <Row>
 
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.zip}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                    </Form.Row>
-                                    <Form.Group>
-                                        <Form.Check
-                                            required
-                                            name="terms"
-                                            label="Agree to terms and conditions"
-                                            onChange={handleChange}
-                                            isInvalid={!!errors.terms}
-                                            feedback={errors.terms}
-                                            id="validationFormik0"
-                                        />
-                                    </Form.Group>
-                                    <Button type="submit">Submit form</Button>
-                                </Form>
-                            )}
-                    </Formik>
 
+                                            <div style={{ paddingLeft: "15px" }}>Search for your average location around a city</div>
+                                        </Row>
+                                        <Row>
+
+                                            <Col xs={7}>
+
+                                                <InputGroup className="mb-3">
+                                                    <InputGroup.Prepend>
+                                                        <InputGroup.Text id="basic-addon1">City</InputGroup.Text>
+                                                    </InputGroup.Prepend>
+                                                    <FormControl
+                                                        type="text"
+                                                        value={city}
+
+                                                        onChange={e => { setCity(e.target.value) }}
+                                                        placeholder="Paris"
+                                                        aria-label="City or address"
+                                                        aria-describedby="basic-addon1"
+                                                    />
+                                                </InputGroup>
+
+                                            </Col>
+
+                                            <Col>
+
+                                                <InputGroup className="mb-3" >
+                                                    <InputGroup.Prepend>
+                                                        <InputGroup.Text>Radius</InputGroup.Text>
+                                                    </InputGroup.Prepend>
+                                                    <FormControl aria-label="Radius in Km" value={radius}
+                                                        onChange={e => setRadius(e.target.value)} />
+                                                    <InputGroup.Append>
+                                                        <InputGroup.Text>Km</InputGroup.Text>
+                                                    </InputGroup.Append>
+                                                </InputGroup>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+
+
+                                            <div style={{ paddingLeft: "15px" }}>Exclude locations in an area to determine your average location</div>
+                                        </Row>
+                                        <Row>
+
+                                            <Col xs={7}>
+
+                                                <InputGroup className="mb-3">
+                                                    <InputGroup.Prepend>
+                                                        <InputGroup.Text id="basic-addon1">City</InputGroup.Text>
+                                                    </InputGroup.Prepend>
+                                                    <FormControl
+                                                        value={excludedCity}
+                                                        onChange={e => { setExcludedCity(e.target.value) }}
+
+                                                        placeholder="Paris"
+                                                        aria-label="City or address"
+                                                        aria-describedby="basic-addon1"
+                                                    />
+                                                </InputGroup>
+                                            </Col>
+
+                                            <Col>
+
+                                                <InputGroup className="mb-3">
+                                                    <InputGroup.Prepend>
+                                                        <InputGroup.Text>Radius</InputGroup.Text>
+                                                    </InputGroup.Prepend>
+                                                    <FormControl aria-label="Radius in Km" value={excludedCityRadius}
+                                                        onChange={e => setExcludedCityRadius(e.target.value)} />
+                                                    <InputGroup.Append>
+                                                        <InputGroup.Text>Km</InputGroup.Text>
+                                                    </InputGroup.Append>
+                                                </InputGroup>
+                                            </Col>
+                                        </Row>
+
+                                    </div>
+                                </Card.Body>
+                            </Accordion.Collapse>
+                        </Card>
+
+                    </Accordion>
                     < div className="container text-center mt-5" >
                         <div {...getRootProps()} >
                             <input {...getInputProps()} />
@@ -306,14 +278,16 @@ function Example({ onComplete, handleClose }) {
                             }
                         </ul>
                     </div>
-                </Modal.Body>
-                <Modal.Footer>
+                    <br></br>
                     <div>
                         {percentLoaded > 0 &&
                             <ProgressBar animated now={percentLoaded} label={`${percentLoaded}%`} />
                         }
                     </div>
-                </Modal.Footer>
+
+                </Modal.Body>
+
+
             </Modal>
         </>
     );
