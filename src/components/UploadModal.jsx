@@ -10,6 +10,8 @@ import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
 import Accordion from 'react-bootstrap/Accordion'
 import Card from 'react-bootstrap/Card'
+import Geocode from "react-geocode";
+
 
 function Example({ onComplete, handleClose }) {
 
@@ -22,27 +24,32 @@ function Example({ onComplete, handleClose }) {
 
     const maxSize = 204857600;
 
+    Geocode.setApiKey(process.env.REACT_APP_MAPS_JS_API_KEY);
+
+    async function findGeoCodeFromAddress(address) {
+        let response = await Geocode.fromAddress(address)
+        let data = response.results[0].geometry.location;
+        return data;
+    }
 
 
 
-    const onDrop = React.useCallback(acceptedFiles => {
+
+    const onDrop = React.useCallback(async (acceptedFiles) => {
 
         console.log("the city is", city, "radius is", radius);
         let centerPoint = null;
         let centerPointToExclude = null;
-        if (city) {
-            centerPoint = {
-                lat: 48.85341,
-                lng: 2.3488
-            }
-        };
 
-        if (excludedCity) {
-            centerPointToExclude = {
-                lat: 48.81670,
-                lng: 2.2333
-            }
+        //If a city and/or and excluded city was provided, get coordinates
+        if (city) {
+            centerPoint = await findGeoCodeFromAddress(city)
+            console.log(centerPoint)
         };
+        console.log(centerPoint)
+
+        //TODO same for excludedCityCenter
+
 
         const startTime = new Date().getTime();
         const acceptedFile = acceptedFiles[0];
@@ -85,6 +92,8 @@ function Example({ onComplete, handleClose }) {
 
     }, [city, radius, excludedCity, excludedCityRadius]
     );
+
+
 
 
     function checkIfWithinDistance(testLocation, centerPoint, distanceToCenter) {

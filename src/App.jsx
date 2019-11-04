@@ -27,7 +27,7 @@ class App extends React.Component {
         lat: null,
         lng: null,
       },
-      isModalShown: true,
+      isModalShown: true
 
     };
     this.target = React.createRef();
