@@ -48,7 +48,11 @@ function Example({ onComplete, handleClose }) {
         };
         console.log(centerPoint)
 
-        //TODO same for excludedCityCenter
+        if (excludedCity) {
+            centerPointToExclude = await findGeoCodeFromAddress(excludedCity)
+            console.log(centerPointToExclude)
+        };
+        console.log(centerPoint)
 
 
         const startTime = new Date().getTime();

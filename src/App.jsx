@@ -9,7 +9,6 @@ import Map from "./components/Map.jsx"
 import Marker from "./components/Marker.jsx"
 
 
-const APIKey = process.env.REACT_APP_MAPS_JS_API_KEY;
 
 const style = {
   width: '100vw',
@@ -108,5 +107,5 @@ class App extends React.Component {
 }
 
 export default GoogleApiWrapper({
-  apiKey: APIKey
+  apiKey: process.env.REACT_APP_MAPS_JS_API_KEY
 })(App);

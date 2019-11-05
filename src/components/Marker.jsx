@@ -26,6 +26,12 @@ export default class Marker extends React.Component {
         this.marker = new google.maps.Marker(pref);
     }
 
+    componentWillUnmount() {
+        if (this.marker) {
+            this.marker.setMap(null);
+        }
+    }
+
 
 
     render() {
