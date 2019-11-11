@@ -60,7 +60,7 @@ class App extends React.Component {
         <div ref={this.target}>
           {this.state.isModalShown ? (
 
-            <Example onComplete={this.handlePositions} handleClose={() => { console.log("set new state"); this.setState({ isModalShown: false }) }} />
+            <Example google={this.props.google} onComplete={this.handlePositions} handleClose={() => { console.log("set new state"); this.setState({ isModalShown: false }) }} />
           ) : (
               <div>
 

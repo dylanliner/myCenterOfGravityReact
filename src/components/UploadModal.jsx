@@ -10,49 +10,22 @@ import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
 import Accordion from 'react-bootstrap/Accordion'
 import Card from 'react-bootstrap/Card'
-import Geocode from "react-geocode";
-
+import AutoComplete from './AutoComplete'
 
 function Example({ onComplete, handleClose }) {
 
     const [percentLoaded, setPercentLoaded] = React.useState(0);
-    const [city, setCity] = React.useState("");
-    const [excludedCity, setExcludedCity] = React.useState("");
+    const [cityCoord, setCityCoord] = React.useState();
+    const [excludedCityCoord, setExcludedCityCoord] = React.useState();
     const [excludedCityRadius, setExcludedCityRadius] = React.useState(3);
     const [radius, setRadius] = React.useState(10);
 
 
     const maxSize = 204857600;
 
-    Geocode.setApiKey(process.env.REACT_APP_MAPS_JS_API_KEY);
-
-    async function findGeoCodeFromAddress(address) {
-        let response = await Geocode.fromAddress(address)
-        let data = response.results[0].geometry.location;
-        return data;
-    }
-
-
-
-
     const onDrop = React.useCallback(async (acceptedFiles) => {
 
-        console.log("the city is", city, "radius is", radius);
-        let centerPoint = null;
-        let centerPointToExclude = null;
 
-        //If a city and/or and excluded city was provided, get coordinates
-        if (city) {
-            centerPoint = await findGeoCodeFromAddress(city)
-            console.log(centerPoint)
-        };
-        console.log(centerPoint)
-
-        if (excludedCity) {
-            centerPointToExclude = await findGeoCodeFromAddress(excludedCity)
-            console.log(centerPointToExclude)
-        };
-        console.log(centerPoint)
 
 
         const startTime = new Date().getTime();
@@ -67,12 +40,12 @@ function Example({ onComplete, handleClose }) {
         var os = new oboe();
         os.node('locations.*', function (location) {
 
-            if (centerPoint) {
-                isLocationWithinDistance = checkIfWithinDistance(location, centerPoint, radius)
+            if (cityCoord) {
+                isLocationWithinDistance = checkIfWithinDistance(location, cityCoord, radius)
             }
 
-            if (centerPointToExclude) {
-                isNotWithinDistance = !checkIfWithinDistance(location, centerPointToExclude, excludedCityRadius)
+            if (excludedCityCoord) {
+                isNotWithinDistance = !checkIfWithinDistance(location, excludedCityCoord, excludedCityRadius)
             }
 
             if (isLocationWithinDistance && isNotWithinDistance) {
@@ -94,7 +67,7 @@ function Example({ onComplete, handleClose }) {
         });
         parseFile(acceptedFile, os);
 
-    }, [city, radius, excludedCity, excludedCityRadius]
+    }, [cityCoord, radius, excludedCityCoord, excludedCityRadius]
     );
 
 
@@ -163,7 +136,7 @@ function Example({ onComplete, handleClose }) {
 
         <>
 
-            <Modal show={true} onHide={handleClose} >
+            <Modal show onHide={handleClose} >
                 <Modal.Header closeButton >
                     <Modal.Title>What's my center of Gravity?</Modal.Title>
 
@@ -180,7 +153,6 @@ function Example({ onComplete, handleClose }) {
                                 <Card.Body style={{ padding: "0", paddingTop: "15px" }}>
                                     <div>
 
-
                                         <Row>
 
 
@@ -190,20 +162,9 @@ function Example({ onComplete, handleClose }) {
 
                                             <Col xs={7}>
 
-                                                <InputGroup className="mb-3">
-                                                    <InputGroup.Prepend>
-                                                        <InputGroup.Text id="basic-addon1">City</InputGroup.Text>
-                                                    </InputGroup.Prepend>
-                                                    <FormControl
-                                                        type="text"
-                                                        value={city}
+                                                <AutoComplete onAddressSelected={e => setCityCoord(e)} />
 
-                                                        onChange={e => { setCity(e.target.value) }}
-                                                        placeholder="Paris"
-                                                        aria-label="City or address"
-                                                        aria-describedby="basic-addon1"
-                                                    />
-                                                </InputGroup>
+
 
                                             </Col>
 
@@ -230,19 +191,9 @@ function Example({ onComplete, handleClose }) {
 
                                             <Col xs={7}>
 
-                                                <InputGroup className="mb-3">
-                                                    <InputGroup.Prepend>
-                                                        <InputGroup.Text id="basic-addon1">City</InputGroup.Text>
-                                                    </InputGroup.Prepend>
-                                                    <FormControl
-                                                        value={excludedCity}
-                                                        onChange={e => { setExcludedCity(e.target.value) }}
+                                                <AutoComplete onAddressSelected={e => setExcludedCityCoord(e)} />
 
-                                                        placeholder="Paris"
-                                                        aria-label="City or address"
-                                                        aria-describedby="basic-addon1"
-                                                    />
-                                                </InputGroup>
+
                                             </Col>
 
                                             <Col>
