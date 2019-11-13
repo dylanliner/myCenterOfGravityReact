@@ -1,24 +1,21 @@
-import React from "react";
+import React from 'react';
 
-
+import PropTypes from 'prop-types';
 import { GoogleApiWrapper } from 'google-maps-react';
 import Button from 'react-bootstrap/Button';
 import Overlay from 'react-bootstrap/Overlay';
-import Example from "./components/UploadModal.jsx"
-import Map from "./components/Map.jsx"
-import Marker from "./components/Marker.jsx"
-
+import Example from './components/UploadModal';
+import Map from './components/Map';
+import Marker from './components/Marker';
 
 
 const style = {
   width: '100vw',
-  height: '100vh'
-}
-
+  height: '100vh',
+};
 
 
 class App extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -26,86 +23,86 @@ class App extends React.Component {
         lat: null,
         lng: null,
       },
-      isModalShown: true
+      isModalShown: true,
 
     };
     this.target = React.createRef();
-
-
   }
 
-
-
+  handleClose = () => {
+    this.setState({ isModalShown: false });
+  }
 
   handlePositions = (updateLatitude, updateLongitude) => {
-    console.log('in parent', updateLatitude, updateLongitude)
     this.setState({
       location: {
         lat: updateLatitude,
-        lng: updateLongitude
+        lng: updateLongitude,
       },
-      isModalShown: false
-    })
-
+      isModalShown: false,
+    });
   }
 
 
-
   render() {
-
+    const { isModalShown, location } = this.state;
+    const { google } = this.props;
     return (
 
       <div>
 
         <div ref={this.target}>
-          {this.state.isModalShown ? (
+          {isModalShown ? (
 
-            <Example google={this.props.google} onComplete={this.handlePositions} handleClose={() => { console.log("set new state"); this.setState({ isModalShown: false }) }} />
+            <Example onComplete={this.handlePositions} handleClose={this.handleClose} />
           ) : (
-              <div>
+            <div>
 
-                <Overlay target={this.target.current} show={true} placement="bottom">
-                  {({
-                    placement,
-                    scheduleUpdate,
-                    arrowProps,
-                    outOfBoundaries,
-                    show: _show,
-                    ...props
-                  }) => (
-                      <div
-                        {...props}
-                        style={{
-                          background: 'none',
-                          ...props.style,
-                        }}
-                      >
-                        <Button variant="primary" onClick={() => this.setState({ isModalShown: true })}>Try Again!</Button>
-                      </div>
-                    )}
-                </Overlay>
+              <Overlay target={this.target.current} show placement="bottom">
+                {({
+                  placement,
+                  scheduleUpdate,
+                  arrowProps,
+                  outOfBoundaries,
+                  show: _show,
+                  ...props
+                }) => (
+                  <div
+                    {...props}
+                    style={{
+                      background: 'none',
+                      ...props.style,
+                    }}
+                  >
+                    <Button variant="primary" onClick={() => this.setState({ isModalShown: true })}>Try Again!</Button>
+                  </div>
+                )}
+              </Overlay>
 
 
-              </div>
-            )}
+            </div>
+          )}
 
         </div>
 
         <div style={style}>
-          <Map google={this.props.google} currentLocation={this.state.location} >
-            <Marker position={this.state.location} />
+          <Map google={google} currentLocation={location}>
+            <Marker position={location} />
             <Marker />
           </Map>
 
         </div>
 
 
-
       </div>
-    )
+    );
   }
 }
 
 export default GoogleApiWrapper({
-  apiKey: process.env.REACT_APP_MAPS_JS_API_KEY
+  apiKey: process.env.REACT_APP_MAPS_JS_API_KEY,
 })(App);
+
+App.propTypes = {
+  google: PropTypes.object.isRequired,
+};
