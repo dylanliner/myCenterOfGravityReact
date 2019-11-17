@@ -8,12 +8,10 @@ import Example from './components/UploadModal';
 import Map from './components/Map';
 import Marker from './components/Marker';
 
-
 const style = {
   width: '100vw',
   height: '100vh',
 };
-
 
 class App extends React.Component {
   constructor(props) {
@@ -24,14 +22,13 @@ class App extends React.Component {
         lng: null,
       },
       isModalShown: true,
-
     };
     this.target = React.createRef();
   }
 
   handleClose = () => {
     this.setState({ isModalShown: false });
-  }
+  };
 
   handlePositions = (updateLatitude, updateLongitude) => {
     this.setState({
@@ -41,23 +38,21 @@ class App extends React.Component {
       },
       isModalShown: false,
     });
-  }
-
+  };
 
   render() {
     const { isModalShown, location } = this.state;
     const { google } = this.props;
     return (
-
       <div>
-
         <div ref={this.target}>
           {isModalShown ? (
-
-            <Example onComplete={this.handlePositions} handleClose={this.handleClose} />
+            <Example
+              onComplete={this.handlePositions}
+              handleClose={this.handleClose}
+            />
           ) : (
             <div>
-
               <Overlay target={this.target.current} show placement="bottom">
                 {({
                   placement,
@@ -65,6 +60,7 @@ class App extends React.Component {
                   arrowProps,
                   outOfBoundaries,
                   show: _show,
+
                   ...props
                 }) => (
                   <div
@@ -74,15 +70,17 @@ class App extends React.Component {
                       ...props.style,
                     }}
                   >
-                    <Button variant="primary" onClick={() => this.setState({ isModalShown: true })}>Try Again!</Button>
+                    <Button
+                      variant="primary"
+                      onClick={() => this.setState({ isModalShown: true })}
+                    >
+                      Try Again!
+                    </Button>
                   </div>
                 )}
               </Overlay>
-
-
             </div>
           )}
-
         </div>
 
         <div style={style}>
@@ -90,10 +88,7 @@ class App extends React.Component {
             <Marker position={location} />
             <Marker />
           </Map>
-
         </div>
-
-
       </div>
     );
   }
