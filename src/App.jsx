@@ -26,6 +26,23 @@ class App extends React.Component {
     this.target = React.createRef();
   }
 
+  componentDidMount() {
+    const { centerAroundCurrentLocation } = this.props;
+    if (centerAroundCurrentLocation) {
+      if (navigator && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          const { coords } = pos;
+          this.setState({
+            location: {
+              lat: coords.latitude,
+              lng: coords.longitude,
+            },
+          });
+        });
+      }
+    }
+  }
+
   handleClose = () => {
     this.setState({ isModalShown: false });
   };
@@ -100,4 +117,9 @@ export default GoogleApiWrapper({
 
 App.propTypes = {
   google: PropTypes.object.isRequired,
+  centerAroundCurrentLocation: PropTypes.bool,
+};
+
+App.defaultProps = {
+  centerAroundCurrentLocation: true,
 };

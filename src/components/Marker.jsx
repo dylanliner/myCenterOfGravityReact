@@ -3,17 +3,17 @@ import PropTypes from 'prop-types';
 
 export default class Marker extends React.Component {
   componentDidUpdate(prevProps) {
-    if ((this.props.map !== prevProps.map)
-            || (this.props.position !== prevProps.position)) {
+    if (
+      this.props.map !== prevProps.map ||
+      this.props.position !== prevProps.position
+    ) {
       this.renderMarker();
     }
   }
 
   renderMarker() {
     console.log('marker?');
-    let {
-      map, google, position, mapCenter,
-    } = this.props;
+    let { map, google, position, mapCenter } = this.props;
     const pos = position || mapCenter;
     position = new google.maps.LatLng(pos.lat, pos.lng);
     const pref = {
@@ -29,7 +29,6 @@ export default class Marker extends React.Component {
     }
   }
 
-
   render() {
     return null;
   }
@@ -38,4 +37,3 @@ Marker.propTypes = {
   position: PropTypes.object,
   map: PropTypes.object,
 };
-

@@ -8,51 +8,16 @@ const style = {
 };
 
 export default class Map extends React.Component {
-  constructor(props) {
-    super(props);
-    const { initialCenter } = this.props;
-    const { lat, lng } = initialCenter;
-    this.state = {
-      currentLocation: {
-        lat,
-        lng,
-      },
-    };
-  }
-
   componentDidMount() {
-    const { centerAroundCurrentLocation } = this.props;
-
-    if (centerAroundCurrentLocation) {
-      if (navigator && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          const { coords } = pos;
-          this.setState({
-            currentLocation: {
-              lat: coords.latitude,
-              lng: coords.longitude,
-            },
-          });
-        });
-      }
-    }
     this.loadMap();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.currentLocation.lng) {
-      console.log(nextProps.currentLocation);
-      this.setState({ currentLocation: nextProps.currentLocation });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { google } = this.props;
-    const { currentLocation } = this.state;
+  componentDidUpdate(prevProps) {
+    const { google, currentLocation } = this.props;
     if (prevProps.google !== google) {
       this.loadMap();
     }
-    if (prevState.currentLocation !== currentLocation) {
+    if (prevProps.currentLocation !== currentLocation) {
       console.log('something changed');
       this.recenterMap();
     }
@@ -60,9 +25,8 @@ export default class Map extends React.Component {
 
   recenterMap() {
     const { map } = this;
-    const { currentLocation } = this.state;
 
-    const { google } = this.props;
+    const { google, currentLocation } = this.props;
     const { maps } = google;
 
     if (map) {
@@ -130,7 +94,6 @@ export default class Map extends React.Component {
 Map.propTypes = {
   google: PropTypes.object,
   zoom: PropTypes.number,
-  centerAroundCurrentLocation: PropTypes.bool,
   initialCenter: PropTypes.shape({
     lat: PropTypes.number.isRequired,
     lng: PropTypes.number.isRequired,
@@ -149,7 +112,6 @@ Map.defaultProps = {
     lat: 37.774929,
     lng: -122.419416,
   },
-  centerAroundCurrentLocation: true,
   currentLocation: {
     lat: 37.774929,
     lng: -122.419416,
